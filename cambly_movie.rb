@@ -122,7 +122,7 @@ module Cambly
     end
 
     def file_name(video_row)
-      start_time(video_row).strftime('lesson_%A_%F_%H:%M.mp4')
+      start_time(video_row).strftime('lesson_%A_%F_%H_%M.mp4')
     end
 
     def download(url, filename)
