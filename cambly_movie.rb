@@ -151,7 +151,7 @@ module Cambly
     private
 
     def file_name
-      start_time.strftime('lesson_%A_%F_%H:%M.mp4')
+      start_time.strftime('lesson_%A_%F_%H%M.mp4')
     end
 
     def path
