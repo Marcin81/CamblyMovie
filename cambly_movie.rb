@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 
 require 'json'
-require 'curb'
 require 'down'
 require 'progressbar'
 require 'thor'
 require 'uri'
+require "httpx"
 
 module Cambly
   class Menu < ::Thor
@@ -61,22 +61,20 @@ module Cambly
     def headers
       {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36',
-        "Content-Type": 'application/json; charset=UTF-8'
+        "Content-Type": 'application/json; charset=UTF-8',
+        "cookie": 'csrfToken=exp-Happy; lang=pl; CookieConsent=true; session=eyJ0b2tlbiI6InNIUVRnQjcvZDFGazhGZ1duTTNlT1FiSG8vL0ZBdGVRIn0.Y6N2Ig.yhBTtw8CmodP8xs6psV9V7AtjsY',
+        "x-csrf": 'exp-Happy'
       }
     end
 
     def login
-      http = Curl.post(session_url, login_params.to_json) do |curl|
-        curl.headers = headers
-      end
-      self.result = JSON.parse(http.body_str).fetch('result')
+      response = HTTPX.post(session_url, body: login_params.to_json, headers: headers)
+      self.result = JSON.parse(response.body).fetch('result')
     end
 
     def fetch_list
-      http = Curl.get(charts_url) do |curl|
-        curl.headers = list_headers
-      end
-      self.video_rows = JSON.parse(http.body_str).fetch('result').select{ |v| v['hasVideoUrl'] }
+      response = HTTPX.get(charts_url, headers: list_headers)
+      self.video_rows = JSON.parse(response.body).fetch('result').select{ |v| v['hasVideoUrl'] }
     end
 
     def download_list
@@ -176,7 +174,7 @@ module Cambly
     end
 
     def download
-      ::Down.download(url, download_params.merge(destination: filename))
+      ::Down.download(url, download_params, destination: filename)
     end
 
     protected
